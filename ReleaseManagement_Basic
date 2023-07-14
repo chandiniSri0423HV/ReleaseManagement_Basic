@@ -40,7 +40,7 @@ pipeline {
                         bat(deployIntegCmd)
                     } else if (selectedOption == 'Replace') {
                         echo 'Replacing an integration'
-                        def updateIntegFileCmd = "curl -X PUT --user ${params.Username}:${params.Password} --header \"Accept:application/json\" --form \"file=@\\\"${params.IARFileName}\\\"\" --form type=application/octet-stream ${instanceURL}/ic/api/integration/v1/integrations/archive"
+                        def updateIntegFileCmd = "curl -X PUT --user ${Username}:${Password} --header \"Accept:application/json\" --form \"file=@\\\"${params.IARFileName}\\\"\" --form type=application/octet-stream ${instanceURL}/ic/api/integration/v1/integrations/archive"
                         bat(updateIntegFileCmd)
                     } else {
                         echo 'No import method is selected'
@@ -128,7 +128,7 @@ pipeline {
                         bat(configLookupCmd)
                     } else if (selectedOption == 'Replace') {
                         echo 'Replacing a lookup'
-                        def updateLookupCmd = "curl -X PUT --user ${params.Username}:${params.Password} -F \"file=@${params.LookupFileName}\" -F type=application/octet-stream \"${instanceURL}/ic/api/integration/v1/lookups/archive\""
+                        def updateLookupCmd = "curl -X PUT --user ${Username}:${Password} -F \"file=@${params.LookupFileName}\" -F type=application/octet-stream \"${instanceURL}/ic/api/integration/v1/lookups/archive\""
                         bat(updateLookupCmd)
                     } else {
                         echo 'No import method is selected'
