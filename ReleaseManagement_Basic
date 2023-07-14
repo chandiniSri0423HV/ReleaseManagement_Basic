@@ -1,0 +1,187 @@
+pipeline {
+    agent any
+    parameters {
+        booleanParam(name: 'Activate_Integration', defaultValue: false, description: 'Check the box to activate the integration after importing')
+        choice(name: 'InstanceURL', choices: ['DEV', 'UAT', 'PROD'], description: 'Select the instance URL')
+    }
+    stages {
+        stage('Import Integration') {
+            steps {
+                script {
+                    def instanceURL
+					def Username
+                    def Password
+                    switch(params.InstanceURL) {
+                        case 'DEV':
+                            instanceURL = 'https://testinstance-idevjxz332qf-ia.integration.ocp.oraclecloud.com/'
+							Username = 'Devops_user'
+                            Password = 'Oic_Jenkins#2023'
+                            break
+                        case 'UAT':
+                            instanceURL = 'http://example.com/url2'
+							Username = 'username1'
+                            Password = 'password1'
+                            break
+                        case 'PROD':
+                            instanceURL = 'http://example.com/url3'
+							Username = 'username1'
+                            Password = 'password1'
+                            break
+                        default:
+                            echo 'Invalid instance URL'
+                            return
+                    }
+                    
+                    def selectedOption = "${params.Import_Method}".trim()
+                    if (selectedOption == 'New') {
+                        echo 'Adding new integration'
+                        def integURL = "${instanceURL}/ic/api/integration/v1/integrations/archive"
+                        def deployIntegCmd = "curl --location \"${integURL}\" --silent --user ${params.Username}:${params.Password} --form \"file=@\\\"${params.IARFileName}\\\"\""
+                        bat(deployIntegCmd)
+                    } else if (selectedOption == 'Replace') {
+                        echo 'Replacing an integration'
+                        def updateIntegFileCmd = "curl -X PUT --user ${params.Username}:${params.Password} --header \"Accept:application/json\" --form \"file=@\\\"${params.IARFileName}\\\"\" --form type=application/octet-stream ${instanceURL}/ic/api/integration/v1/integrations/archive"
+                        bat(updateIntegFileCmd)
+                    } else {
+                        echo 'No import method is selected'
+                    }
+                }
+            }
+        }
+
+        stage('Import Connection') {
+            steps {
+                script {
+                    def instanceURL
+					def Username
+                    def Password
+                    switch(params.InstanceURL) {
+                        case 'DEV':
+                            instanceURL = 'https://testinstance-idevjxz332qf-ia.integration.ocp.oraclecloud.com/'
+							Username = 'Devops_user'
+                            Password = 'Oic_Jenkins#2023'
+                            break
+                        case 'UAT':
+                            instanceURL = 'http://example.com/url2'
+							Username = 'username1'
+                            Password = 'password1'
+                            break
+                        case 'PROD':
+                            instanceURL = 'http://example.com/url3'
+							Username = 'username1'
+                            Password = 'password1'
+                            break
+                        default:
+                            echo 'Invalid instance URL'
+                            return
+                    }
+                    
+                    def selectedOption = "${params.Import_Method}".trim()
+                    if (selectedOption == 'New') {
+                        echo 'Adding new connection'
+                        bat """
+                        curl --user ${params.Username}:${params.Password} --header "X-HTTP-Method-Override:PATCH" --header "Content-Type:application/json" -d @${params.ConnectionFileName} ${instanceURL}/ic/api/integration/v1/connections/${params.ConnectionName}
+                        """
+                    } else if (selectedOption == 'Replace') {
+                        echo 'Replacing a connection'
+                        bat"""
+                        curl --user ${params.Username}:${params.Password} --header "X-HTTP-Method-Override:PATCH" --header "Content-Type:application/json" -d @${params.ConnectionFileName} ${instanceURL}/ic/api/integration/v1/connections/${params.ConnectionName}
+                        """
+                    } else {
+                        echo 'No import method is selected'
+                    }
+                }
+            }
+        }
+
+        stage('Import Lookup') {
+            steps {
+                script {
+                    def instanceURL
+					def Username
+                    def Password
+                    switch(params.InstanceURL) {
+                        case 'DEV':
+                            instanceURL = 'https://testinstance-idevjxz332qf-ia.integration.ocp.oraclecloud.com/'
+							Username = 'Devops_user'
+                            Password = 'Oic_Jenkins#2023'
+                            break
+                        case 'UAT':
+                            instanceURL = 'http://example.com/url2'
+							Username = 'username1'
+                            Password = 'password1'
+                            break
+                        case 'PROD':
+                            instanceURL = 'http://example.com/url3'
+							Username = 'username1'
+                            Password = 'password1'
+                            break
+                        default:
+                            echo 'Invalid instance URL'
+                            return
+                    }
+                    
+                    def selectedOption = "${params.Import_Method}".trim()
+                    if (selectedOption == 'New') {
+                        echo 'Adding new lookup'
+                        def configLookupCmd = "curl -X POST --user ${params.Username}:${params.Password} -F \"file=@${params.LookupFileName}\" -F \"type=application/octet-stream\" ${instanceURL}/ic/api/integration/v1/lookups/archive"
+                        bat(configLookupCmd)
+                    } else if (selectedOption == 'Replace') {
+                        echo 'Replacing a lookup'
+                        def updateLookupCmd = "curl -X PUT --user ${params.Username}:${params.Password} -F \"file=@${params.LookupFileName}\" -F type=application/octet-stream \"${instanceURL}/ic/api/integration/v1/lookups/archive\""
+                        bat(updateLookupCmd)
+                    } else {
+                        echo 'No import method is selected'
+                    }
+                }
+            }
+        }
+
+        stage('Activation of Integration') {
+            steps {
+                script {
+                    def instanceURL
+					def Username
+                    def Password
+                    switch(params.InstanceURL) {
+                        case 'DEV':
+                            instanceURL = 'https://testinstance-idevjxz332qf-ia.integration.ocp.oraclecloud.com/'
+							Username = 'Devops_user'
+                            Password = 'Oic_Jenkins#2023'
+                            break
+                        case 'UAT':
+                            instanceURL = 'http://example.com/url2'
+							Username = 'username1'
+                            Password = 'password1'
+                            break
+                        case 'PROD':
+                            instanceURL = 'http://example.com/url3'
+							Username = 'username1'
+                            Password = 'password1'
+                            break
+                        default:
+                            echo 'Invalid instance URL'
+                            return
+                    }
+                    
+                    def integName = params.Integration_Identifier.toString()
+                    if (params.Activate_Integration) {
+                        // Perform action when the checkbox is checked
+                        echo 'Checkbox is checked'
+                        def activateIntegrationCmd = "curl --user ${params.Username}:${params.Password} --header \"Content-Type: application/json\" --header \"X-HTTP-Method-Override: PATCH\" -d @Activate.json --location \"${instanceURL}/ic/api/integration/v1/integrations/${integName}\""
+                        bat(activateIntegrationCmd)
+                        echo "Integration Activated"
+                        // Add your desired logic here
+                    } else {
+                        // Perform a different action when the checkbox is not checked
+                        echo 'Checkbox is not checked'
+                        // Add your desired logic here
+                        def deactivateIntegrationCmd = "curl --user ${params.Username}:${params.Password} --header \"Content-Type: application/json\" --header \"X-HTTP-Method-Override: PATCH\" -d @Deactivate.json -d 'enableAsyncActivationMode=true' \"${instanceURL}/ic/api/integration/v1/integrations/${integName}\""
+                        bat(deactivateIntegrationCmd)
+                        echo "Integration Configured"
+                    }
+                }
+            }
+        }
+    }
+}
