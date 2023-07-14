@@ -52,7 +52,7 @@ pipeline {
         stage('Import Connection') {
             steps {
                 script {
-                    def instanceURL
+				def instanceURL
 					def Username
                     def Password
                     switch(params.InstanceURL) {
@@ -75,20 +75,54 @@ pipeline {
                             echo 'Invalid instance URL'
                             return
                     }
-                    
-                    def selectedOption = "${params.Import_Method}".trim()
-                    if (selectedOption == 'New') {
-                        echo 'Adding new connection'
-                        bat """
-						curl --user ${Username}:${Password} --header "X-HTTP-Method-Override:PATCH" --header "Content-Type:application/json" -d @${params.ConnectionFileName} ${instanceURL}/ic/api/integration/v1/connections/${params.ConnectionName}
-						"""
-                    } else if (selectedOption == 'Replace') {
-                        echo 'Replacing a connection'
-                        bat """
-						curl --user ${Username}:${Password} --header "X-HTTP-Method-Override:PATCH" --header "Content-Type:application/json" -d @${params.ConnectionFileName} ${instanceURL}/ic/api/integration/v1/connections/${params.ConnectionName}
-						"""
-                    } else {
-                        echo 'No import method is selected'
+                    def csvFile = readFile(params.CSV_File_Name).trim()
+                    def records = csvFile.readLines().drop(1).collect { line -> line.tokenize(',') }
+                    records.each { record ->
+                        def field1 = record[0]
+                        def field2 = record[1]
+                        def field3 = record[2]
+                        def field4 = record[3]
+                        
+                        def conProperties = """
+                            { 
+                                "connectionProperties": { 
+                                    "propertyGroup": "CONNECTION_PROPS",
+                                    "propertyName": "connectionUrl",
+                                    "propertyType": "URL",
+                                    "propertyValue": "${field1}"
+                                },
+                                "securityPolicy": "BASIC_AUTH",
+                                "securityProperties": [
+                                    {
+                                        "propertyGroup": "CREDENTIALS",
+                                        "propertyName": "username",
+                                        "propertyValue": "${field2}"
+                                    },
+                                    {
+                                        "propertyGroup": "CREDENTIALS",
+                                        "propertyName": "password",
+                                        "propertyValue": "${field3}"
+                                    }
+                                ]
+                            }
+                        """
+                        def payload = conProperties.replace('\n', '').trim()
+                        writeFile file: 'payload.json', text: payload
+						def selectedOption = "${params.Import_Method}".trim()
+						if (selectedOption == 'New') {
+							echo 'Adding new connection'
+							bat """
+							curl -X POST --user ${Username}:${Password} --header "X-HTTP-Method-Override:PATCH" --header "Content-Type:application/json" -d @payload.json "${instanceURL}/ic/api/integration/v1/connections/${field4}"
+							"""
+							echo "New connection configured"
+						} else if (selectedOption == 'Replace') {
+							echo 'Replacing a connection'
+							bat """
+							curl -X POST --user ${Username}:${Password} --header "X-HTTP-Method-Override:PATCH" --header "Content-Type:application/json" -d @payload.json "${instanceURL}/ic/api/integration/v1/connections/${field4}"
+							"""
+						} else {
+							echo 'No import method is selected'
+						}					 
                     }
                 }
             }
