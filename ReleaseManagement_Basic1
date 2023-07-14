@@ -40,6 +40,8 @@ pipeline {
                         bat(deployIntegCmd)
                     } else if (selectedOption == 'Replace') {
                         echo 'Replacing an integration'
+						def activateIntegrationCmd = "curl --user ${Username}:${Password} --header \"Content-Type: application/json\" --header \"X-HTTP-Method-Override: PATCH\" -d @Activate.json --location \"${instanceURL}/ic/api/integration/v1/integrations/${integName}\""
+                        bat(activateIntegrationCmd)
                         def updateIntegFileCmd = "curl -X PUT --user ${Username}:${Password} --header \"Accept:application/json\" --form \"file=@\\\"${params.IARFileName}\\\"\" --form type=application/octet-stream ${instanceURL}/ic/api/integration/v1/integrations/archive"
                         bat(updateIntegFileCmd)
                     } else {
