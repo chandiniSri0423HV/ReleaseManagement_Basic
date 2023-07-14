@@ -78,7 +78,7 @@ pipeline {
                             echo 'Invalid instance URL'
                             return
                     }
-                    def csvFile = readFile(params.CSV_File_Name).trim()
+                    def csvFile = readFile(params.ConnectionProperties).trim()
                     def records = csvFile.readLines().drop(1).collect { line -> line.tokenize(',') }
                     records.each { record ->
                         def field1 = record[0]
@@ -135,40 +135,50 @@ pipeline {
             steps {
                 script {
                     def instanceURL
-					def Username
-                    def Password
-                    switch(params.InstanceURL) {
+                    def username
+                    def password
+                    switch (params.InstanceURL) {
                         case 'DEV':
                             instanceURL = 'https://testinstance-idevjxz332qf-ia.integration.ocp.oraclecloud.com'
-							Username = 'Devops_user'
-                            Password = 'Oic_Jenkins#2023'
+                            username = 'Devops_user'
+                            password = 'Oic_Jenkins#2023'
                             break
                         case 'UAT':
                             instanceURL = 'http://example.com/url2'
-							Username = 'username1'
-                            Password = 'password1'
+                            username = 'username1'
+                            password = 'password1'
                             break
                         case 'PROD':
                             instanceURL = 'http://example.com/url3'
-							Username = 'username1'
-                            Password = 'password1'
+                            username = 'username1'
+                            password = 'password1'
                             break
                         default:
                             echo 'Invalid instance URL'
                             return
                     }
+                    def files = params.FileNames.split(',')
+                    def selectedOption = params.Import_Method.trim()
                     
-                    def selectedOption = "${params.Import_Method}".trim()
-                    if (selectedOption == 'New') {
-                        echo 'Adding new lookup'
-						def configLookupCmd = "curl -X POST --user ${Username}:${Password} -F \"file=@${params.LookupFileName}\" -F \"type=application/octet-stream\" ${instanceURL}/ic/api/integration/v1/lookups/archive"
-                        bat(configLookupCmd)
-                    } else if (selectedOption == 'Replace') {
-                        echo 'Replacing a lookup'
-                        def updateLookupCmd = "curl -X PUT --user ${Username}:${Password} -F \"file=@${params.LookupFileName}\" -F type=application/octet-stream \"${instanceURL}/ic/api/integration/v1/lookups/archive\""
-                        bat(updateLookupCmd)
-                    } else {
-                        echo 'No import method is selected'
+                    for (int i = 0; i < files.size(); i++) {
+                        def fileName = files[i].trim()
+                        
+                        if (fileName) {
+                            // Execute curl command based on the import method
+                            if (selectedOption == 'New') {
+                                echo 'Adding new lookup'
+                                bat """
+                                    curl -X POST --user ${username}:${password} -F \"file=@${fileName}\" -F \"type=application/octet-stream\" ${instanceURL}/ic/api/integration/v1/lookups/archive
+                                """
+                            } else if (selectedOption == 'Replace') {
+                                echo 'Replacing a lookup'
+                                bat """
+                                    curl -X PUT --user ${username}:${password} -F \"file=@${fileName}\" -F \"type=application/octet-stream\" ${instanceURL}/ic/api/integration/v1/lookups/archive
+                                """
+                            } else {
+                                echo 'No import method is selected'
+                            }
+                        }
                     }
                 }
             }
