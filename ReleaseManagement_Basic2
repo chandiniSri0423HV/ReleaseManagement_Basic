@@ -43,8 +43,10 @@ pipeline {
                     if (selectedOption == 'New') {
                         echo 'Adding new integration'
                         def integURL = "${env.serviceURL}/ic/api/integration/v1/integrations/archive"
-                        def deployIntegCmd = "curl --location '${integURL}' --silent --user ${env.USR}:${env.PSW} --form \"file=@\\\"${params.IARFileName}\\\"\""
-                        bat(deployIntegCmd)
+						echo "${integURL}"
+                        def deployIntegCmd = "curl --location \"${integURL}\" --user ${env.USR}:${env.PSW} --form \"file=@\\\"${params.IARFileName}\\\"\""
+						bat(deployIntegCmd)
+
                     } else if (selectedOption == 'Replace') {
                         echo 'Replacing an integration'
                         def integName = params.Integration_Identifier.toString()
