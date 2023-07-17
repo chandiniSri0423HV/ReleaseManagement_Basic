@@ -2,8 +2,8 @@ pipeline {
     agent any
 	environment {
         DEV_Creds = credentials('DEV_CredID')
-        PROD_Creds = credentials('PROD_CredID')
-        UAT_Creds = credentials('UAT_CredID')
+      /*  PROD_Creds = credentials('PROD_CredID')
+        UAT_Creds = credentials('UAT_CredID')*/
     }
     parameters {
         booleanParam(name: 'Activate_Integration', defaultValue: false, description: 'Check the box to activate the integration after importing')
@@ -23,7 +23,7 @@ pipeline {
 							Username = env.DEV_Creds_USR
                             Password = env.DEV_Creds_PSW
                             break
-                        case 'UAT':
+/*  case 'UAT':
                             instanceURL = env.PROD
 							Username = env.PROD_Creds_USR
                             Password = env.PROD_Creds_PSW
@@ -32,7 +32,7 @@ pipeline {
                             instanceURL = env.UAT
 							Username = env.UAT_Creds_USR
                             Password = env.UAT_Creds_PSW
-                            break
+                            break*/
                         default:
                             echo 'Invalid instance URL'
                             return
@@ -71,7 +71,7 @@ pipeline {
 							Username = env.DEV_Creds_USR
                             Password = env.DEV_Creds_PSW
                             break
-                        case 'UAT':
+                      /*  case 'UAT':
                             instanceURL = env.PROD
 							Username = env.PROD_Creds_USR
                             Password = env.PROD_Creds_PSW
@@ -80,7 +80,7 @@ pipeline {
                             instanceURL = env.UAT
 							Username = env.UAT_Creds_USR
                             Password = env.UAT_Creds_PSW
-                            break
+                            break*/
                         default:
                             echo 'Invalid instance URL'
                             return
@@ -151,7 +151,7 @@ pipeline {
 							Username = env.DEV_Creds_USR
                             Password = env.DEV_Creds_PSW
                             break
-                        case 'UAT':
+                       /* case 'UAT':
                             instanceURL = env.PROD
 							Username = env.PROD_Creds_USR
                             Password = env.PROD_Creds_PSW
@@ -160,7 +160,7 @@ pipeline {
                             instanceURL = env.UAT
 							Username = env.UAT_Creds_USR
                             Password = env.UAT_Creds_PSW
-                            break
+                            break*/
                         default:
                             echo 'Invalid instance URL'
                             return
@@ -205,7 +205,7 @@ pipeline {
 							Username = env.DEV_Creds_USR
                             Password = env.DEV_Creds_PSW
                             break
-                        case 'UAT':
+                       /* case 'UAT':
                             instanceURL = env.PROD
 							Username = env.PROD_Creds_USR
                             Password = env.PROD_Creds_PSW
@@ -214,7 +214,7 @@ pipeline {
                             instanceURL = env.UAT
 							Username = env.UAT_Creds_USR
                             Password = env.UAT_Creds_PSW
-                            break
+                            break*/
                         default:
                             echo 'Invalid instance URL'
                             return
