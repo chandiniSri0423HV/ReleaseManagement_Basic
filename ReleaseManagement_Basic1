@@ -18,6 +18,7 @@ pipeline {
                     def Password
                     switch(params.InstanceURL) {
                         case 'DEV':
+							echo "${params.InstanceURL}"
                             //instanceURL = 'https://testinstance-idevjxz332qf-ia.integration.ocp.oraclecloud.com'
 							instanceURL = env.DEV_URL
 							Username = env.DEV_Creds_USR
