@@ -19,7 +19,7 @@ pipeline {
                     switch(params.InstanceURL) {
                         case 'DEV':
                             //instanceURL = 'https://testinstance-idevjxz332qf-ia.integration.ocp.oraclecloud.com'
-							instanceURL = env.DEV
+							instanceURL = env.DEV_URL
 							Username = env.DEV_Creds_USR
                             Password = env.DEV_Creds_PSW
                             break
@@ -67,7 +67,7 @@ pipeline {
                     switch(params.InstanceURL) {
                         case 'DEV':
                             //instanceURL = 'https://testinstance-idevjxz332qf-ia.integration.ocp.oraclecloud.com'
-							instanceURL = env.DEV
+							instanceURL = env.DEV_URL
 							Username = env.DEV_Creds_USR
                             Password = env.DEV_Creds_PSW
                             break
@@ -147,7 +147,7 @@ pipeline {
                     switch (params.InstanceURL) {
                         case 'DEV':
                             //instanceURL = 'https://testinstance-idevjxz332qf-ia.integration.ocp.oraclecloud.com'
-							instanceURL = env.DEV
+							instanceURL = env.DEV_URL
 							Username = env.DEV_Creds_USR
                             Password = env.DEV_Creds_PSW
                             break
@@ -201,7 +201,7 @@ pipeline {
                     switch(params.InstanceURL) {
                         case 'DEV':
                             //instanceURL = 'https://testinstance-idevjxz332qf-ia.integration.ocp.oraclecloud.com'
-							instanceURL = env.DEV
+							instanceURL = env.DEV_URL
 							Username = env.DEV_Creds_USR
                             Password = env.DEV_Creds_PSW
                             break
