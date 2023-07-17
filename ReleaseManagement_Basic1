@@ -1,8 +1,13 @@
 pipeline {
     agent any
+	environment {
+        DEV_Creds = credentials('DEV_CredID')
+        PROD_Creds = credentials('PROD_CredID')
+        UAT_Creds = credentials('UAT_CredID')
+    }
     parameters {
         booleanParam(name: 'Activate_Integration', defaultValue: false, description: 'Check the box to activate the integration after importing')
-        choice(name: 'InstanceURL', choices: ['DEV', 'UAT', 'PROD'], description: 'Select the instance URL')
+       // choice(name: 'InstanceURL', choices: ['DEV', 'UAT', 'PROD'], description: 'Select the instance URL')
     }
     stages {
         stage('Import Integration') {
@@ -13,19 +18,20 @@ pipeline {
                     def Password
                     switch(params.InstanceURL) {
                         case 'DEV':
-                            instanceURL = 'https://testinstance-idevjxz332qf-ia.integration.ocp.oraclecloud.com'
-							Username = 'Devops_user'
-                            Password = 'Oic_Jenkins#2023'
+                            //instanceURL = 'https://testinstance-idevjxz332qf-ia.integration.ocp.oraclecloud.com'
+							instanceURL = env.DEV
+							Username = env.DEV_Creds_USR
+                            Password = env.DEV_Creds_PSW
                             break
                         case 'UAT':
-                            instanceURL = 'http://example.com/url2'
-							Username = 'username1'
-                            Password = 'password1'
+                            instanceURL = env.PROD
+							Username = env.PROD_Creds_USR
+                            Password = env.PROD_Creds_PSW
                             break
                         case 'PROD':
-                            instanceURL = 'http://example.com/url3'
-							Username = 'username1'
-                            Password = 'password1'
+                            instanceURL = env.UAT
+							Username = env.UAT_Creds_USR
+                            Password = env.UAT_Creds_PSW
                             break
                         default:
                             echo 'Invalid instance URL'
@@ -60,19 +66,20 @@ pipeline {
                     def Password
                     switch(params.InstanceURL) {
                         case 'DEV':
-                            instanceURL = 'https://testinstance-idevjxz332qf-ia.integration.ocp.oraclecloud.com'
-							Username = 'Devops_user'
-                            Password = 'Oic_Jenkins#2023'
+                            //instanceURL = 'https://testinstance-idevjxz332qf-ia.integration.ocp.oraclecloud.com'
+							instanceURL = env.DEV
+							Username = env.DEV_Creds_USR
+                            Password = env.DEV_Creds_PSW
                             break
                         case 'UAT':
-                            instanceURL = 'http://example.com/url2'
-							Username = 'username1'
-                            Password = 'password1'
+                            instanceURL = env.PROD
+							Username = env.PROD_Creds_USR
+                            Password = env.PROD_Creds_PSW
                             break
                         case 'PROD':
-                            instanceURL = 'http://example.com/url3'
-							Username = 'username1'
-                            Password = 'password1'
+                            instanceURL = env.UAT
+							Username = env.UAT_Creds_USR
+                            Password = env.UAT_Creds_PSW
                             break
                         default:
                             echo 'Invalid instance URL'
@@ -139,19 +146,20 @@ pipeline {
                     def password
                     switch (params.InstanceURL) {
                         case 'DEV':
-                            instanceURL = 'https://testinstance-idevjxz332qf-ia.integration.ocp.oraclecloud.com'
-                            username = 'Devops_user'
-                            password = 'Oic_Jenkins#2023'
+                            //instanceURL = 'https://testinstance-idevjxz332qf-ia.integration.ocp.oraclecloud.com'
+							instanceURL = env.DEV
+							Username = env.DEV_Creds_USR
+                            Password = env.DEV_Creds_PSW
                             break
                         case 'UAT':
-                            instanceURL = 'http://example.com/url2'
-                            username = 'username1'
-                            password = 'password1'
+                            instanceURL = env.PROD
+							Username = env.PROD_Creds_USR
+                            Password = env.PROD_Creds_PSW
                             break
                         case 'PROD':
-                            instanceURL = 'http://example.com/url3'
-                            username = 'username1'
-                            password = 'password1'
+                            instanceURL = env.UAT
+							Username = env.UAT_Creds_USR
+                            Password = env.UAT_Creds_PSW
                             break
                         default:
                             echo 'Invalid instance URL'
@@ -192,19 +200,20 @@ pipeline {
                     def Password
                     switch(params.InstanceURL) {
                         case 'DEV':
-                            instanceURL = 'https://testinstance-idevjxz332qf-ia.integration.ocp.oraclecloud.com'
-							Username = 'Devops_user'
-                            Password = 'Oic_Jenkins#2023'
+                            //instanceURL = 'https://testinstance-idevjxz332qf-ia.integration.ocp.oraclecloud.com'
+							instanceURL = env.DEV
+							Username = env.DEV_Creds_USR
+                            Password = env.DEV_Creds_PSW
                             break
                         case 'UAT':
-                            instanceURL = 'http://example.com/url2'
-							Username = 'username1'
-                            Password = 'password1'
+                            instanceURL = env.PROD
+							Username = env.PROD_Creds_USR
+                            Password = env.PROD_Creds_PSW
                             break
                         case 'PROD':
-                            instanceURL = 'http://example.com/url3'
-							Username = 'username1'
-                            Password = 'password1'
+                            instanceURL = env.UAT
+							Username = env.UAT_Creds_USR
+                            Password = env.UAT_Creds_PSW
                             break
                         default:
                             echo 'Invalid instance URL'
