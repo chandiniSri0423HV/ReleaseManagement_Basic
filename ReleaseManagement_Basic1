@@ -1,3 +1,20 @@
+def Update_details(instance_selected){
+        if(instance_selected.equals("DEV")){
+            env.USR = env.DEV_Creds_USR
+            env.PSW = env.DEV_Creds_PSW
+            env.instanceURL = env.DEV_URL
+        }
+        /*else if(instance_selected.equals("ESLL_URL")){
+            env.USR = env.ESLL_CREDS_USR
+            env.PSW = env.ESLL_CREDS_PSW
+            env.instanceURL = env.ESLL_URL
+        }
+        else if(instance_selected.equals("ETIT_URL")){
+            env.USR = env.ETIT_CREDS_USR
+            env.PSW = env.ETIT_CREDS_PSW
+            env.serviceUrl = env.ETIT_URL
+        }*/
+    }
 pipeline {
     agent any
 	environment {
@@ -9,11 +26,12 @@ pipeline {
         booleanParam(name: 'Activate_Integration', defaultValue: false, description: 'Check the box to activate the integration after importing')
        // choice(name: 'InstanceURL', choices: ['DEV', 'UAT', 'PROD'], description: 'Select the instance URL')
     }
+	
     stages {
         stage('Import Integration') {
             steps {
                 script {
-                    def instanceURL
+                    /*def instanceURL
 					def Username
                     def Password
                     switch((params.InstanceURL).toString()) {
@@ -24,7 +42,7 @@ pipeline {
 							Username = env.DEV_Creds_USR
                             Password = env.DEV_Creds_PSW
                             break
-						/*  case 'UAT':
+							case 'UAT':
                             instanceURL = env.PROD
 							Username = env.PROD_Creds_USR
                             Password = env.PROD_Creds_PSW
@@ -33,24 +51,24 @@ pipeline {
                             instanceURL = env.UAT
 							Username = env.UAT_Creds_USR
                             Password = env.UAT_Creds_PSW
-                            break*/
+                            break
                         default:
                             echo 'Invalid instance URL'
                             return
-                    }
+                    }*/
                     
                     def selectedOption = "${params.Import_Method}".trim()
                     if (selectedOption == 'New') {
                         echo 'Adding new integration'
                         def integURL = "${instanceURL}/ic/api/integration/v1/integrations/archive"
-						def deployIntegCmd = "curl --location \"${integURL}\" --silent --user ${Username}:${Password} --form \"file=@\\\"${params.IARFileName}\\\"\""
+						def deployIntegCmd = "curl --location \"${integURL}\" --silent --user ${env.USR}:${env.PSW} --form \"file=@\\\"${params.IARFileName}\\\"\""
                         bat(deployIntegCmd)
                     } else if (selectedOption == 'Replace') {
                         echo 'Replacing an integration'
 						def integName = params.Integration_Identifier.toString()
-						def activateIntegrationCmd = "curl --user ${Username}:${Password} --header \"Content-Type: application/json\" --header \"X-HTTP-Method-Override: PATCH\" -d @Deactivate.json --location \"${instanceURL}/ic/api/integration/v1/integrations/${integName}\""
+						def activateIntegrationCmd = "curl --user ${env.USR}:${env.PSW} --header \"Content-Type: application/json\" --header \"X-HTTP-Method-Override: PATCH\" -d @Deactivate.json --location \"${env.instanceURL}/ic/api/integration/v1/integrations/${integName}\""
                         bat(activateIntegrationCmd)
-                        def updateIntegFileCmd = "curl -X PUT --user ${Username}:${Password} --header \"Accept:application/json\" --form \"file=@\\\"${params.IARFileName}\\\"\" --form type=application/octet-stream ${instanceURL}/ic/api/integration/v1/integrations/archive"
+                        def updateIntegFileCmd = "curl -X PUT --user ${env.USR}:${env.PSW} --header \"Accept:application/json\" --form \"file=@\\\"${params.IARFileName}\\\"\" --form type=application/octet-stream ${env.instanceURL}/ic/api/integration/v1/integrations/archive"
                         bat(updateIntegFileCmd)
                     } else {
                         echo 'No import method is selected'
@@ -63,16 +81,18 @@ pipeline {
             steps {
                 script {
 				def instanceURL
+					/*def instanceURL
 					def Username
                     def Password
-                    switch(params.InstanceURL) {
+                    switch((params.InstanceURL).toString()) {
                         case 'DEV':
+							echo "${params.InstanceURL}"
                             //instanceURL = 'https://testinstance-idevjxz332qf-ia.integration.ocp.oraclecloud.com'
 							instanceURL = env.DEV_URL
 							Username = env.DEV_Creds_USR
                             Password = env.DEV_Creds_PSW
                             break
-                      /*  case 'UAT':
+							case 'UAT':
                             instanceURL = env.PROD
 							Username = env.PROD_Creds_USR
                             Password = env.PROD_Creds_PSW
@@ -81,11 +101,11 @@ pipeline {
                             instanceURL = env.UAT
 							Username = env.UAT_Creds_USR
                             Password = env.UAT_Creds_PSW
-                            break*/
+                            break
                         default:
                             echo 'Invalid instance URL'
                             return
-                    }
+                    }*/
                     def csvFile = readFile(params.ConnectionProperties).trim()
                     def records = csvFile.readLines().drop(1).collect { line -> line.tokenize(',') }
                     records.each { record ->
@@ -123,13 +143,13 @@ pipeline {
 						if (selectedOption == 'New') {
 							echo 'Adding new connection'
 							bat """
-							curl -X POST --user ${Username}:${Password} --header "X-HTTP-Method-Override:PATCH" --header "Content-Type:application/json" -d @payload.json "${instanceURL}/ic/api/integration/v1/connections/${field4}"
+							curl -X POST --user ${env.USR}:${env.PSW} --header "X-HTTP-Method-Override:PATCH" --header "Content-Type:application/json" -d @payload.json "${env.instanceURL}/ic/api/integration/v1/connections/${field4}"
 							"""
 							echo "New connection configured"
 						} else if (selectedOption == 'Replace') {
 							echo 'Replacing a connection'
 							bat """
-							curl -X POST --user ${Username}:${Password} --header "X-HTTP-Method-Override:PATCH" --header "Content-Type:application/json" -d @payload.json "${instanceURL}/ic/api/integration/v1/connections/${field4}"
+							curl -X POST --user ${env.USR}:${env.PSW} --header "X-HTTP-Method-Override:PATCH" --header "Content-Type:application/json" -d @payload.json "${env.instanceURL}/ic/api/integration/v1/connections/${field4}"
 							"""
 						} else {
 							echo 'No import method is selected'
@@ -142,17 +162,18 @@ pipeline {
         stage('Import Lookup') {
             steps {
                 script {
-                    def instanceURL
-                    def username
-                    def password
-                    switch (params.InstanceURL) {
+                    /*def instanceURL
+					def Username
+                    def Password
+                    switch((params.InstanceURL).toString()) {
                         case 'DEV':
+							echo "${params.InstanceURL}"
                             //instanceURL = 'https://testinstance-idevjxz332qf-ia.integration.ocp.oraclecloud.com'
 							instanceURL = env.DEV_URL
 							Username = env.DEV_Creds_USR
                             Password = env.DEV_Creds_PSW
                             break
-                       /* case 'UAT':
+							case 'UAT':
                             instanceURL = env.PROD
 							Username = env.PROD_Creds_USR
                             Password = env.PROD_Creds_PSW
@@ -161,11 +182,11 @@ pipeline {
                             instanceURL = env.UAT
 							Username = env.UAT_Creds_USR
                             Password = env.UAT_Creds_PSW
-                            break*/
+                            break
                         default:
                             echo 'Invalid instance URL'
                             return
-                    }
+                    }*/
                     def files = params.FileNames.split(',')
                     def selectedOption = params.Import_Method.trim()
                     
@@ -177,12 +198,12 @@ pipeline {
                             if (selectedOption == 'New') {
                                 echo 'Adding new lookup'
                                 bat """
-                                    curl -X POST --user ${username}:${password} -F \"file=@${fileName}\" -F \"type=application/octet-stream\" ${instanceURL}/ic/api/integration/v1/lookups/archive
+                                    curl -X POST --user ${env.USR}:${env.PSW} -F \"file=@${fileName}\" -F \"type=application/octet-stream\" ${env.instanceURL}/ic/api/integration/v1/lookups/archive
                                 """
                             } else if (selectedOption == 'Replace') {
                                 echo 'Replacing a lookup'
                                 bat """
-                                    curl -X PUT --user ${username}:${password} -F \"file=@${fileName}\" -F \"type=application/octet-stream\" ${instanceURL}/ic/api/integration/v1/lookups/archive
+                                    curl -X PUT --user ${env.USR}:${env.PSW} -F \"file=@${fileName}\" -F \"type=application/octet-stream\" ${env.instanceURL}/ic/api/integration/v1/lookups/archive
                                 """
                             } else {
                                 echo 'No import method is selected'
@@ -196,17 +217,18 @@ pipeline {
         stage('Activation of Integration') {
             steps {
                 script {
-                    def instanceURL
+                    /*def instanceURL
 					def Username
                     def Password
-                    switch(params.InstanceURL) {
+                    switch((params.InstanceURL).toString()) {
                         case 'DEV':
+							echo "${params.InstanceURL}"
                             //instanceURL = 'https://testinstance-idevjxz332qf-ia.integration.ocp.oraclecloud.com'
 							instanceURL = env.DEV_URL
 							Username = env.DEV_Creds_USR
                             Password = env.DEV_Creds_PSW
                             break
-                       /* case 'UAT':
+							case 'UAT':
                             instanceURL = env.PROD
 							Username = env.PROD_Creds_USR
                             Password = env.PROD_Creds_PSW
@@ -215,17 +237,17 @@ pipeline {
                             instanceURL = env.UAT
 							Username = env.UAT_Creds_USR
                             Password = env.UAT_Creds_PSW
-                            break*/
+                            break
                         default:
                             echo 'Invalid instance URL'
                             return
-                    }
+                    }*/
                     
                     def integName = params.Integration_Identifier.toString()
                     if (params.Activate_Integration) {
                         // Perform action when the checkbox is checked
                         echo 'Checkbox is checked'
-						def activateIntegrationCmd = "curl --user ${Username}:${Password} --header \"Content-Type: application/json\" --header \"X-HTTP-Method-Override: PATCH\" -d @Activate.json --location \"${instanceURL}/ic/api/integration/v1/integrations/${integName}\""
+						def activateIntegrationCmd = "curl --user ${env.USR}:${env.PSW} --header \"Content-Type: application/json\" --header \"X-HTTP-Method-Override: PATCH\" -d @Activate.json --location \"${env.instanceURL}/ic/api/integration/v1/integrations/${integName}\""
                         bat(activateIntegrationCmd)
                         echo "Integration Activated"
                         // Add your desired logic here
@@ -233,7 +255,7 @@ pipeline {
                         // Perform a different action when the checkbox is not checked
                         echo 'Checkbox is not checked'
                         // Add your desired logic here
-						def deactivateIntegrationCmd = "curl --user ${Username}:${Password} --header \"Content-Type: application/json\" --header \"X-HTTP-Method-Override: PATCH\" -d @Deactivate.json -d 'enableAsyncActivationMode=true' \"${instanceURL}/ic/api/integration/v1/integrations/${integName}\""
+						def deactivateIntegrationCmd = "curl --user ${env.USR}:${env.PSW} --header \"Content-Type: application/json\" --header \"X-HTTP-Method-Override: PATCH\" -d @Deactivate.json -d 'enableAsyncActivationMode=true' \"${env.instanceURL}/ic/api/integration/v1/integrations/${integName}\""
                         bat(deactivateIntegrationCmd)
                         echo "Integration Configured"
                     }
