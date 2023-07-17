@@ -2,7 +2,7 @@ pipeline {
     agent any
 	environment {
         DEV_Creds = credentials('DEV_CredID')
-      /*  PROD_Creds = credentials('PROD_CredID')
+      /*PROD_Creds = credentials('PROD_CredID')
         UAT_Creds = credentials('UAT_CredID')*/
     }
     parameters {
@@ -16,7 +16,7 @@ pipeline {
                     def instanceURL
 					def Username
                     def Password
-                    switch(params.InstanceURL) {
+                    switch((params.InstanceURL).toString()) {
                         case 'DEV':
 							echo "${params.InstanceURL}"
                             //instanceURL = 'https://testinstance-idevjxz332qf-ia.integration.ocp.oraclecloud.com'
@@ -24,7 +24,7 @@ pipeline {
 							Username = env.DEV_Creds_USR
                             Password = env.DEV_Creds_PSW
                             break
-/*  case 'UAT':
+						/*  case 'UAT':
                             instanceURL = env.PROD
 							Username = env.PROD_Creds_USR
                             Password = env.PROD_Creds_PSW
