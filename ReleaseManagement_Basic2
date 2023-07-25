@@ -10,10 +10,10 @@ def passwordHandler(String input) {
 }
 def Update_details(instance_selected) {
     if (instance_selected.equals("DEV")) {
-     echo "inside update details-dev"
+     //echo "inside update details-dev"
         env.USR = env.DEV_Creds_USR
         env.PSW = env.DEV_Creds_PSW
-        echo "${env.DEV_URL}"
+        //echo "${env.DEV_URL}"
         env.serviceURL = env.DEV_URL
         
         
@@ -38,19 +38,19 @@ pipeline {
             steps {
                 script {
                     Update_details((params.InstanceURL).toString())
-                    echo "${env.serviceURL}"
+                    //echo "${env.serviceURL}"
                     def selectedOption = "${params.Import_Method}".trim()
                     if (selectedOption == 'New') {
                         echo 'Adding new integration'
                         def integURL = "${env.serviceURL}/ic/api/integration/v1/integrations/archive"
-						echo "${integURL}"
+			//echo "${integURL}"
                         def deployIntegCmd = "curl --location \"${integURL}\" --user ${env.USR}:${env.PSW} --form \"file=@\\\"${params.IARFileName}\\\"\""
-						bat(deployIntegCmd)
+			bat(deployIntegCmd)
 
                     } else if (selectedOption == 'Replace') {
                         echo 'Replacing an integration'
                         def integName = params.Integration_Identifier.toString()
-						echo "${integName}"
+			//echo "${integName}"
                         def deactivateIntegrationCmd = "curl --user ${env.USR}:${env.PSW} --header \"Content-Type: application/json\" --header \"X-HTTP-Method-Override: PATCH\" -d @Deactivate.json -d 'enableAsyncActivationMode=true' \"${env.serviceURL}/ic/api/integration/v1/integrations/${integName}\""
                         bat(deactivateIntegrationCmd)
                         def updateIntegFileCmd = "curl -X PUT --user ${env.USR}:${env.PSW} --header \"Accept: application/json\" --form \"file=@\\\"${params.IARFileName}\\\"\" --form type=application/octet-stream ${env.serviceURL}/ic/api/integration/v1/integrations/archive"
