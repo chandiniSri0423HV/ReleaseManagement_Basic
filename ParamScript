@@ -1,0 +1,207 @@
+def passwordHandler(String input) {
+   StringBuilder result = new StringBuilder()
+   for (int i = 0; i < input.length(); i++) {
+       if (input.charAt(i) == '%') {
+           result.append('%')
+       }
+       result.append(input.charAt(i))
+   }
+   return result.toString()
+}
+def Update_details(instance_selected) {
+    if (instance_selected.equals("DEV")) {
+     //echo "inside update details-dev"
+        env.USR = env.DEV_Creds_USR
+        env.PSW = env.DEV_Creds_PSW
+        //echo "${env.DEV_URL}"
+        env.serviceURL = env.DEV_URL
+        
+        
+    }
+}
+
+ 
+
+pipeline {
+    agent any
+    environment {
+        DEV_Creds = credentials('DEV_CredID')
+    }
+    parameters {
+        choice(name: 'InstanceURL', choices: ['DEV', 'PROD', 'UAT'], description: 'Select the instance URL (DEV or PROD)')
+        choice(name: 'Import_Method', choices: ['New', 'Replace'], description: 'Select import method (New or Replace)')
+        string(name: 'IARFileName', defaultValue: 'default.iar', description: 'Enter the .iar file name')
+        string(name: 'Integration_Identifier', defaultValue: '', description: 'Enter the integration name')
+        string(name: 'ConnectionProperties', description: 'Select the CSV file containing connection properties')
+        string(name: 'Lookup_FileNames', defaultValue: '', description: 'Enter lookup file names separated by commas')
+        booleanParam(name: 'Activate_Integration', defaultValue: false, description: 'Check the box to activate the integration after importing')
+
+
+    }
+/*options {
+        choice(name: 'Import_Method', choices: ['New', 'Replace'], description: 'Select import method')
+    }         //paramsList << extendedChoice(name: 'Import_Method', description: 'Select import method', type: 'PT_RADIO', value: 'New,Replace', visibleItemCount: 5)
+
+ */
+
+    stages {
+        stage('Import Integration') {
+            steps {
+                script {
+                    Update_details((params.InstanceURL).toString())
+                    //echo "${env.serviceURL}"
+                    def selectedOption = "${params.Import_Method}".trim()
+                    if (selectedOption == 'New') {
+                        echo 'Adding new integration'
+                        def integURL = "${env.serviceURL}/ic/api/integration/v1/integrations/archive"
+			            //echo "${integURL}"
+                        def iarFileName = "${params.IARFileName}"
+                        echo "Using IAR file: ${iarFileName}"
+                        def deployIntegCmd = "curl --location \"${integURL}\" --user ${env.USR}:${env.PSW} --form \"file=@\\\"${params.IARFileName}\\\"\""
+
+                bat(deployIntegCmd)
+
+                    } else if (selectedOption == 'Replace') {
+                        echo 'Replacing an integration'
+                        def integName = params.Integration_Identifier.toString()
+			//echo "${integName}"
+                        def deactivateIntegrationCmd = "curl --user ${env.USR}:${env.PSW} --header \"Content-Type: application/json\" --header \"X-HTTP-Method-Override: PATCH\" -d @Deactivate.json -d 'enableAsyncActivationMode=true' \"${env.serviceURL}/ic/api/integration/v1/integrations/${integName}\""
+                        bat(deactivateIntegrationCmd)
+                        def updateIntegFileCmd = "curl -X PUT --user ${env.USR}:${env.PSW} --header \"Accept: application/json\" --form \"file=@\\\"${params.IARFileName}\\\"\" --form type=application/octet-stream ${env.serviceURL}/ic/api/integration/v1/integrations/archive"
+                        bat(updateIntegFileCmd)
+                    } else {
+                        echo 'No import method is selected'
+                    }
+                }
+            }
+        }
+
+ 
+
+ 
+
+        stage('Import Connection') {
+            steps {
+                script {
+
+                    def csvFile = readFile(params.ConnectionProperties).trim()
+                    def records = csvFile.readLines().drop(1).collect { line -> line.tokenize(',') }
+                    records.each { record ->
+                        def field1 = record[0]
+                        def field2 = record[1]
+                        def field3 = record[2]
+                        def field4 = record[3]
+
+ 
+
+                        def conProperties = """
+                            { 
+                                "connectionProperties": { 
+                                    "propertyGroup": "CONNECTION_PROPS",
+                                    "propertyName": "connectionUrl",
+                                    "propertyType": "URL",
+                                    "propertyValue": "${field1}"
+                                },
+                                "securityPolicy": "BASIC_AUTH",
+                                "securityProperties": [
+                                    {
+                                        "propertyGroup": "CREDENTIALS",
+                                        "propertyName": "username",
+                                        "propertyValue": "${field2}"
+                                    },
+                                    {
+                                        "propertyGroup": "CREDENTIALS",
+                                        "propertyName": "password",
+                                        "propertyValue": "${field3}"
+                                    }
+                                ]
+                            }
+                        """
+                        def payload = conProperties.replace('\n', '').trim()
+                        writeFile file: 'payload.json', text: payload
+                        def selectedOption = "${params.Import_Method}".trim()
+                        if (selectedOption == 'New') {
+                            echo 'Adding new connection'
+                            bat """
+                            curl -X POST --user ${env.USR}:${env.PSW} --header "X-HTTP-Method-Override:PATCH" --header "Content-Type:application/json" -d @payload.json "${env.serviceURL}/ic/api/integration/v1/connections/${field4}"
+                            """
+                            echo "New connection configured"
+                        } else if (selectedOption == 'Replace') {
+                            echo 'Replacing a connection'
+                            bat """
+                            curl -X POST --user ${env.USR}:${env.PSW} --header "X-HTTP-Method-Override:PATCH" --header "Content-Type:application/json" -d @payload.json "${env.serviceURL}/ic/api/integration/v1/connections/${field4}"
+                            """
+                        } else {
+                            echo 'No import method is selected'
+                        }
+                    }
+                }
+            }
+        }
+
+ 
+
+ 
+
+        stage('Import Lookup') {
+            steps {
+                script {
+                    def files = params.Lookup_FileNames.split(',')
+                    def selectedOption = params.Import_Method.trim()
+
+ 
+
+                    for (int i = 0; i < files.size(); i++) {
+                        def fileName = files[i].trim()
+
+ 
+
+                        if (fileName) {
+                            // Execute curl command based on the import method
+                            if (selectedOption == 'New') {
+                                echo 'Adding new lookup'
+                                bat """
+                                    curl -X POST --user ${env.USR}:${env.PSW} -F \"file=@${fileName}\" -F \"type=application/octet-stream\" ${env.serviceURL}/ic/api/integration/v1/lookups/archive
+                                """
+                            } else if (selectedOption == 'Replace') {
+                                echo 'Replacing a lookup'
+                                bat """
+                                    curl -X PUT --user ${env.USR}:${env.PSW} -F \"file=@${fileName}\" -F \"type=application/octet-stream\" ${env.serviceURL}/ic/api/integration/v1/lookups/archive
+                                """
+                            } else {
+                                echo 'No import method is selected'
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+ 
+
+ 
+
+        stage('Activation of Integration') {
+            steps {
+                script {
+                    def integName = params.Integration_Identifier.toString()
+                    if (params.Activate_Integration) {
+                        // Perform action when the checkbox is checked
+                        echo 'Checkbox is checked'
+                        def activateIntegrationCmd = "curl --user ${env.USR}:${env.PSW} --header \"Content-Type: application/json\" --header \"X-HTTP-Method-Override: PATCH\" -d @Activate.json --location \"${env.serviceURL}/ic/api/integration/v1/integrations/${integName}\""
+                        bat(activateIntegrationCmd)
+                        echo "Integration Activated"
+                        // Add your desired logic here
+                    } else {
+                        // Perform a different action when the checkbox is not checked
+                        echo 'Checkbox is not checked'
+                        // Add your desired logic here
+                        def deactivateIntegrationCmd = "curl --user ${env.USR}:${env.PSW} --header \"Content-Type: application/json\" --header \"X-HTTP-Method-Override: PATCH\" -d @Deactivate.json -d 'enableAsyncActivationMode=true' \"${env.serviceURL}/ic/api/integration/v1/integrations/${integName}\""
+                        bat(deactivateIntegrationCmd)
+                        echo "Integration Configured"
+                    }
+                }
+            }
+        }
+    }
+}
