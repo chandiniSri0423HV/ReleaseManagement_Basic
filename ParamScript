@@ -207,7 +207,7 @@ pipeline {
     }
 post{
         always{
-            mail to: "naivetechblog@gmail.com",
+            mail to: "chandini.srisailaxmiboddu@hitachivantara.com",
             subject: "Test Email",
             body: "Test"
         }
