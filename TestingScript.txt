@@ -20,12 +20,11 @@ pipeline {
         stage('Initialize') {
             steps {
                 script {
-                    instance = params.InstanceURL.trim()
-                    if (instance == 'DEV') {
-                        serviceURL = env.SERVICE_URL_DEV
-                    } else {
-                        error("Unsupported instance: ${instance}")
-                    }
+                   def instance = params.InstanceURL ? params.InstanceURL.trim() : ''
+if (!instance) {
+    error("InstanceURL parameter is not defined. Please set it in job configuration.")
+}
+
                 }
             }
         }
