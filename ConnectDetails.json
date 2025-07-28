@@ -8,7 +8,7 @@
 			"propertyName": "connectionUrl",
 			"propertyShortDesc": "Please make sure that this value really corresponds to the type selected above.",
 			"propertyType": "URL",
-			"propertyValue": "https://testinstance-idevjxz332qf-ia.integration.ocp.oraclecloud.com/",
+			"propertyValue": "https://fa-etaj-saasfademo1.ds-fa.oraclepdemos.com",
 			"requiredFlag": true
 		}
 	],
@@ -22,7 +22,7 @@
 			"propertyGroup": "CREDENTIALS",
 			"propertyName": "username",
 			"propertyType": "STRING",
-			"propertyValue": "traininguser",
+			"propertyValue": "casey.brown",
 			"requiredFlag": true
 		},
 		{
@@ -33,7 +33,7 @@
 			"propertyGroup": "CREDENTIALS",
 			"propertyName": "password",
 			"propertyType": "PASSWORD",
-			"propertyValue": "Hds@ASDF_2025",
+			"propertyValue": "D^6Zm^e7",
 			"requiredFlag": true
 		}
 	]
