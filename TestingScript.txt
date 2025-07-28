@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     tools {
-        git 'GitDefault' // Replace with your actual Git installation name from Jenkins config
+        git 'GitDefault'
     }
 
     environment {
@@ -89,7 +89,11 @@ pipeline {
         stage('Import Lookup') {
             steps {
                 script {
-                    def files = params.FileNames.split(',')*.trim()
+                    def fileArray = params.FileNames.split(',')
+                    def files = []
+                    for (f in fileArray) {
+                        files.add(f.trim())
+                    }
                     def method = params.Import_Method?.trim() == 'New' ? 'POST' : 'PUT'
 
                     files.each { fileName ->
